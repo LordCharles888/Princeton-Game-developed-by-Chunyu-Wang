@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey to Princeton</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        #game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #FF8F00; /* Princeton orange */
+        }
+        #language-select {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        #game-content {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        #options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .option-button {
+            padding: 10px;
+            background-color: #FF8F00; /* Princeton orange */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .option-button:hover {
+            background-color: #E65100; /* Darker orange */
+        }
+        #stats {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        #orange-bubble {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FF8F00;
+            font-weight: bold;
+            display: none;
+        }
+        #image-container {
+            width: 100%;
+            height: 200px;
+            background-color: #e0e0e0;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="language-select">
+            <button onclick="changeLanguage('en')" class="option-button">English</button>
+            <button onclick="changeLanguage('fr')" class="option-button">Français</button>
+        </div>
+        <h1 id="game-title">Journey to Princeton</h1>
+        <div id="image-container">Princeton University Campus Scene</div>
+        <div id="stats">
+            <div class="stat">
+                <span id="academic-label">Academic</span>: 
+                <span id="academic-value" class="stat-value">50</span>
+            </div>
+            <div class="stat">
+                <span id="extracurricular-label">Extracurricular</span>: 
+                <span id="extracurricular-value" class="stat-value">50</span>
+            </div>
+            <div class="stat">
+                <span id="personal-label">Personal Growth</span>: 
+                <span id="personal-value" class="stat-value">50</span>
+            </div>
+        </div>
+        <div id="orange-bubble">
+            <span id="orange-bubble-text">Orange Bubble Power Activated!</span>
+        </div>
+        <div id="game-content">
+            Welcome to your journey to Princeton University!
+        </div>
+        <div id="options">
+            <!-- Options will be dynamically populated -->
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            currentSceneId: 'start',
+            academics: 50,
+            extracurricular: 50,
+            personal: 50,
+            hasOrangeBubble: false,
+            language: 'en'
+        };
+
+        // Language translations
+        const translations = {
+            en: {
+                gameTitle: "Journey to Princeton",
+                academic: "Academic",
+                extracurricular: "Extracurricular",
+                personal: "Personal Growth",
+                orangeBubbleText: "Orange Bubble Power Activated!",
+                successMessage: "Congratulations! You've been accepted to Princeton University!",
+                alternateSuccess: "True Princeton spirit doesn't require a paper diploma. Your effort and perseverance have proven that you are no different from a real Princeton student.",
+                restart: "Start Again"
+            },
+            fr: {
+                gameTitle: "Voyage à Princeton",
+                academic: "Académique",
+                extracurricular: "Parascolaire",
+                personal: "Développement Personnel",
+                orangeBubbleText: "Pouvoir de la Bulle Orange Activé !",
+                successMessage: "Félicitations ! Vous avez été accepté à l'Université de Princeton !",
+                alternateSuccess: "Le véritable esprit de Princeton ne nécessite pas de diplôme en papier. Vos efforts et votre persévérance ont prouvé que vous n'êtes pas différent d'un véritable étudiant de l'Université de Princeton.",
+                restart: "Recommencer"
+            }
+        };
+
+        // Princeton elements
+        const princetonElements = {
+            locations: ["Nassau Hall", "Princeton University Chapel", "Princeton Stadium"],
+            traditions: ["Reunions", "P-rade", "Dean's Date"],
+            courses: ["MAT104: Calculus II", "COS126: Computer Science", "ECO100: Introduction to Economics"]
+        };
+
+        // Game scenes
+        const scenes = {
+            'start': {
+                en: {
+                    text: "Welcome to your journey to Princeton University! As a high school student with big dreams, you aspire to join the prestigious Orange & Black. What's your first step?",
+                    options: [
+                        { text: "Focus on academics and study diligently", nextScene: 'academics1' },
+                        { text: "Join extracurricular activities", nextScene: 'extracurricular1' },
+                        { text: "Work on personal statement and essays", nextScene: 'personal1' }
+                    ]
+                },
+                fr: {
+                    text: "Bienvenue dans votre voyage vers l'Université de Princeton ! En tant qu'élève du secondaire avec de grands rêves, vous aspirez à rejoindre le prestigieux Orange & Noir. Quelle est votre première étape ?",
+                    options: [
+                        { text: "Se concentrer sur les études et étudier avec diligence", nextScene: 'academics1' },
+                        { text: "Participer à des activités parascolaires", nextScene: 'extracurricular1' },
+                        { text: "Travailler sur la lettre de motivation et les essais", nextScene: 'personal1' }
+                    ]
+                }
+            },
+            'academics1': {
+                en: {
+                    text: `You decide to focus on your academics. You're taking advanced courses including ${princetonElements.courses[0]} and ${princetonElements.courses[1]}. How do you approach your studies?`,
+                    options: [
+                        { text: "Study alone in the library", nextScene: 'academics2', academicsChange: 15 },
+                        { text: "Form a study group with friends", nextScene: 'academics2', academicsChange: 10, personalChange: 5 },
+                        { text: "Get a tutor for difficult subjects", nextScene: 'academics2', academicsChange: 20, personalChange: -5 }
+                    ]
+                },
+                fr: {
+                    text: `Vous décidez de vous concentrer sur vos études. Vous suivez des cours avancés, dont ${princetonElements.courses[0]} et ${princetonElements.courses[1]}. Comment abordez-vous vos études ?`,
+                    options: [
+                        { text: "Étudier seul à la bibliothèque", nextScene: 'academics2', academicsChange: 15 },
+                        { text: "Former un groupe d'étude avec des amis", nextScene: 'academics2', academicsChange: 10, personalChange: 5 },
+                        { text: "Obtenir un tuteur pour les matières difficiles", nextScene: 'academics2', academicsChange: 20, personalChange: -5 }
+                    ]
+                }
+            },
+            'academics2': {
+                en: {
+                    text: `Your hard work is paying off! Your teacher recommends a summer program at Princeton. While visiting, you get to see the famous ${princetonElements.locations[0]}. What do you do during the program?`,
+                    options: [
+                        { text: "Focus entirely on the academic curriculum", nextScene: 'decision1', academicsChange: 15 },
+                        { text: "Balance academics with exploring campus", nextScene: 'decision1', academicsChange: 10, personalChange: 10 },
+                        { text: "Network with professors and students", nextScene: 'decision1', academicsChange: 5, personalChange: 15, orangeBubble: true }
+                    ]
+                },
+                fr: {
+                    text: `Votre travail acharné porte ses fruits ! Votre professeur recommande un programme d'été à Princeton. Lors de votre visite, vous pouvez voir le célèbre ${princetonElements.locations[0]}. Que faites-vous pendant le programme ?`,
+                    options: [
+                        { text: "Se concentrer entièrement sur le programme académique", nextScene: 'decision1', academicsChange: 15 },
+                        { text: "Équilibrer les études avec l'exploration du campus", nextScene: 'decision1', academicsChange: 10, personalChange: 10 },
+                        { text: "Réseauter avec les professeurs et les étudiants", nextScene: 'decision1', academicsChange: 5, personalChange: 15, orangeBubble: true }
+                    ]
+                }
+            },
+            'extracurricular1': {
+                en: {
+                    text: `You decide to enhance your application with extracurricular activities. Which activity do you choose to focus on?`,
+                    options: [
+                        { text: "Join the debate team", nextScene: 'extracurricular2', extracurricularChange: 15 },
+                        { text: "Volunteer for community service", nextScene: 'extracurricular2', extracurricularChange: 10, personalChange: 10 },
+                        { text: "Excel in a sport", nextScene: 'extracurricular2', extracurricularChange: 20 }
+                    ]
+                },
+                fr: {
+                    text: `Vous décidez d'améliorer votre candidature avec des activités parascolaires. Quelle activité choisissez-vous?`,
+                    options: [
+                        { text: "Rejoindre l'équipe de débat", nextScene: 'extracurricular2', extracurricularChange: 15 },
+                        { text: "Faire du bénévolat", nextScene: 'extracurricular2', extracurricularChange: 10, personalChange: 10 },
+                        { text: "Exceller dans un sport", nextScene: 'extracurricular2', extracurricularChange: 20 }
+                    ]
+                }
+            },
+            'extracurricular2': {
+                en: {
+                    text: `Your extracurricular activities have made you stand out! You're invited to a special event at Princeton's ${princetonElements.locations[1]}. While there, you learn about ${princetonElements.traditions[0]}. What aspect of Princeton do you explore?`,
+                    options: [
+                        { text: `Learn about the ${princetonElements.traditions[1]} tradition`, nextScene: 'decision1', extracurricularChange: 10, personalChange: 10 },
+                        { text: "Attend a lecture by a renowned professor", nextScene: 'decision1', academicsChange: 15, extracurricularChange: 5 },
+                        { text: "Participate in an 'Orange Bubble' workshop", nextScene: 'decision1', extracurricularChange: 15, orangeBubble: true }
+                    ]
+                },
+                fr: {
+                    text: `Vos activités parascolaires vous ont démarqué ! Vous êtes invité à un événement spécial à ${princetonElements.locations[1]} de Princeton. Pendant votre séjour, vous en apprenez davantage sur ${princetonElements.traditions[0]}. Quel aspect de Princeton explorez-vous ?`,
+                    options: [
+                        { text: `En savoir plus sur la tradition de ${princetonElements.traditions[1]}`, nextScene: 'decision1', extracurricularChange: 10, personalChange: 10 },
+                        { text: "Assister à une conférence d'un professeur renommé", nextScene: 'decision1', academicsChange: 15, extracurricularChange: 5 },
+                        { text: "Participer à un atelier 'Bulle Orange'", nextScene: 'decision1', extracurricularChange: 15, orangeBubble: true }
+                    ]
+                }
+            },
+            'personal1': {
+                en: {
+                    text: `You decide to focus on personal growth and developing your unique story. What do you choose to do?`,
+                    options: [
+                        { text: "Start a blog about your passions", nextScene: 'personal2', personalChange: 15 },
+                        { text: "Take on a leadership role in a club", nextScene: 'personal2', personalChange: 10, extracurricularChange: 10 },
+                        { text: "Learn a new skill that sets you apart", nextScene: 'personal2', personalChange: 20 }
+                    ]
+                },
+                fr: {
+                    text: `Vous décidez de vous concentrer sur votre développement personnel et de développer votre histoire unique. Que choisissez-vous de faire?`,
+                    options: [
+                        { text: "Créer un blog sur vos passions", nextScene: 'personal2', personalChange: 15 },
+                        { text: "Assumer un rôle de leadership dans un club", nextScene: 'personal2', personalChange: 10, extracurricularChange: 10 },
+                        { text: "Apprendre une nouvelle compétence qui vous démarque", nextScene: 'personal2', personalChange: 20 }
+                    ]
+                }
+            },
+            'personal2': {
+                en: {
+                    text: `Your personal development journey has been impressive! A Princeton alumnus notices your growth and invites you to shadow them during a visit to ${princetonElements.locations[2]}. What do you gain from this experience?`,
+                    options: [
+                        { text: "Valuable insights into Princeton's culture", nextScene: 'decision1', personalChange: 15 },
+                        { text: "A letter of recommendation", nextScene: 'decision1', academicsChange: 10, personalChange: 10 },
+                        { text: "The 'Orange Bubble' mindset", nextScene: 'decision1', personalChange: 15, orangeBubble: true }
+                    ]
+                },
+                fr: {
+                    text: `Votre parcours de développement personnel a été impressionnant ! Un ancien de Princeton remarque votre évolution et vous invite à l'accompagner lors d'une visite au ${princetonElements.locations[2]}. Que retirez-vous de cette expérience ?`,
+                    options: [
+                        { text: "Des aperçus précieux sur la culture de Princeton", nextScene: 'decision1', personalChange: 15 },
+                        { text: "Une lettre de recommandation", nextScene: 'decision1', academicsChange: 10, personalChange: 10 },
+                        { text: "La mentalité 'Bulle Orange'", nextScene: 'decision1', personalChange: 15, orangeBubble: true }
+                    ]
+                }
+            },
+            'decision1': {
+                en: {
+                    text: `It's time to prepare your application to Princeton. What aspect do you emphasize in your personal statement?`,
+                    options: [
+                        { text: "Your academic achievements and intellectual curiosity", nextScene: 'decision2', academicsChange: 15 },
+                        { text: "Your extracurricular accomplishments and leadership", nextScene: 'decision2', extracurricularChange: 15 },
+                        { text: "Your personal growth and unique perspective", nextScene: 'decision2', personalChange: 15 }
+                    ]
+                },
+                fr: {
+                    text: `Il est temps de préparer votre candidature à Princeton. Quel aspect mettez-vous en avant dans votre lettre de motivation ?`,
+                    options: [
+                        { text: "Vos réussites académiques et votre curiosité intellectuelle", nextScene: 'decision2', academicsChange: 15 },
+                        { text: "Vos accomplissements parascolaires et votre leadership", nextScene: 'decision2', extracurricularChange: 15 },
+                        { text: "Votre développement personnel et votre perspective unique", nextScene: 'decision2', personalChange: 15 }
+                    ]
+                }
+            },
+            'decision2': {
+                en: {
+                    text: `Your application is almost complete! What final touch do you add?`,
+                    options: [
+                        { text: "A recommendation from your math teacher highlighting your problem-solving skills", nextScene: 'ending', academicsChange: 10 },
+                        { text: "Documentation of your community impact project", nextScene: 'ending', extracurricularChange: 10 },
+                        { text: "A creative portfolio showcasing your unique talents", nextScene: 'ending', personalChange: 10 }
+                    ]
+                },
+                fr: {
+                    text: `Votre candidature est presque complète ! Quelle touche finale ajoutez-vous ?`,
+                    options: [
+                        { text: "Une recommandation de votre professeur de mathématiques soulignant vos compétences en résolution de problèmes", nextScene: 'ending', academicsChange: 10 },
+                        { text: "Documentation de votre projet d'impact communautaire", nextScene: 'ending', extracurricularChange: 10 },
+                        { text: "Un portfolio créatif mettant en valeur vos talents uniques", nextScene: 'ending', personalChange: 10 }
+                    ]
+                }
+            },
+            'ending': {
+                en: {
+                    text: "It's decision day! You nervously open your email to find your admission result...",
+                    options: [
+                        { text: "View your result", nextScene: 'result' }
+                    ]
+                },
+                fr: {
+                    text: "C'est le jour de la décision ! Vous ouvrez nerveusement votre email pour trouver votre résultat d'admission...",
+                    options: [
+                        { text: "Voir votre résultat", nextScene: 'result' }
+                    ]
+                }
+            },
+            'result': {
+                // This will be dynamically generated based on stats
+                en: { text: "", options: [] },
+                fr: { text: "", options: [] }
+            }
+        };
+
+        // Display a scene
+        function displayScene(sceneId) {
+            gameState.currentSceneId = sceneId;
+            const scene = scenes[sceneId][gameState.language];
+            const gameContent = document.getElementById('game-content');
+            const optionsContainer = document.getElementById('options');
+            
+            // Special case for result screen
+            if (sceneId === 'result') {
+                determineResult();
+                return;
+            }
+            
+            // Display scene text
+            gameContent.textContent = scene.text;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add new options
+            scene.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option.text;
+                button.addEventListener('click', () => selectOption(option));
+                optionsContainer.appendChild(button);
+            });
+            
+            // Update stats display
+            updateStatsDisplay();
+        }
+
+        // Select an option
+        function selectOption(option) {
+            // Apply stat changes
+            if (option.academicsChange) {
+                gameState.academics += option.academicsChange;
+                if (gameState.hasOrangeBubble) gameState.academics += 5;
+            }
+            if (option.extracurricularChange) {
+                gameState.extracurricular += option.extracurricularChange;
+                if (gameState.hasOrangeBubble) gameState.extracurricular += 5;
+            }
+            if (option.personalChange) {
+                gameState.personal += option.personalChange;
+                if (gameState.hasOrangeBubble) gameState.personal += 5;
+            }
+            
+            // Cap stats at 100
+            gameState.academics = Math.min(100, gameState.academics);
+            gameState.extracurricular = Math.min(100, gameState.extracurricular);
+            gameState.personal = Math.min(100, gameState.personal);
+            
+            // Check for Orange Bubble
+            if (option.orangeBubble) {
+                gameState.hasOrangeBubble = true;
+                document.getElementById('orange-bubble').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('orange-bubble').style.display = 'none';
+                }, 3000);
+            }
+            
+            // Move to next scene
+            displayScene(option.nextScene);
+        }
+
+        // Update stats display
+        function updateStatsDisplay() {
+            document.getElementById('academic-value').textContent = gameState.academics;
+            document.getElementById('extracurricular-value').textContent = gameState.extracurricular;
+            document.getElementById('personal-value').textContent = gameState.personal;
+        }
+
+        // Change language
+        function changeLanguage(lang) {
+            gameState.language = lang;
+            updateUILanguage();
+            displayScene(gameState.currentSceneId);
+        }
+
+        // Update UI elements with current language
+        function updateUILanguage() {
+            const lang = gameState.language;
+            
+            document.getElementById('game-title').textContent = translations[lang].gameTitle;
+            document.getElementById('academic-label').textContent = translations[lang].academic;
+            document.getElementById('extracurricular-label').textContent = translations[lang].extracurricular;
+            document.getElementById('personal-label').textContent = translations[lang].personal;
+            document.getElementById('orange-bubble-text').textContent = translations[lang].orangeBubbleText;
+        }
+
+        // Determine the game result
+        function determineResult() {
+            const gameContent = document.getElementById('game-content');
+            const optionsContainer = document.getElementById('options');
+            const lang = gameState.language;
+            
+            // Calculate total score
+            const totalScore = gameState.academics + gameState.extracurricular + gameState.personal;
+            
+            // Always succeed, but different messages based on score
+            let resultMessage;
+            let isMainSuccess = totalScore >= 250 || gameState.hasOrangeBubble;
+            
+            if (isMainSuccess) {
+                resultMessage = translations[lang].successMessage;
+            } else {
+                resultMessage = translations[lang].alternateSuccess;
+            }
+            
+            // Display result
+            gameContent.textContent = resultMessage;
+            
+            // Clear options and add restart button
+            optionsContainer.innerHTML = '';
+            const restartButton = document.createElement('button');
+            restartButton.className = 'option-button';
+            restartButton.textContent = translations[lang].restart;
+            restartButton.addEventListener('click', resetGame);
+            optionsContainer.appendChild(restartButton);
+        }
+
+        // Reset the game
+        function resetGame() {
+            gameState.academics = 50;
+            gameState.extracurricular = 50;
+            gameState.personal = 50;
+            gameState.hasOrangeBubble = false;
+            
+            document.getElementById('orange-bubble').style.display = 'none';
+            
+            displayScene('start');
+        }
+
+        // Initialize game when page loads
+        window.onload = function() {
+            updateUILanguage();
+            displayScene('start');
+        };
+    </script>
+</body>
+</html>
